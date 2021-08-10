@@ -1,11 +1,11 @@
 from __future__ import absolute_import, division, print_function
 
-import requests 
+import os
+import requests
 import random, string
 
 from requests.exceptions import RequestException
-from ansible.module_utils.basic import AnsibeModule
-from ansible.utils.display import Display
+from ansible.module_utils.basic import AnsibleModule
 
 __metaclass__ = "type"
 
@@ -25,13 +25,11 @@ options:
         description:
             - The username of the admin user for importing to ScadaLTS. 
         type: str
-        required: True
         default: admin
     password:
         description:
             - The password of the admin user for importing to ScadaLTS.
         type: str
-        required: True
         default: admin
     url:
         description:
@@ -72,7 +70,7 @@ def scada_import(username, password, url, src):
     # Data for Requests
     auth = {"username": username,"password": password}
     
-    import_file = {"importFile": ("random.zip", open(src,"rb"), "application/zip")}
+    import_file = {"importFile": (os.path.basename(src), open(src,"rb"), "application/zip")}
     
     sess_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=35))
     
@@ -133,12 +131,10 @@ def main():
     argument_spec = { 
         "username" : {
             "type" : "str",
-            "required" : True,
             "default" : "admin"
         },
         "password" : {
             "type" : "str",
-            "required" : True,
             "no_log" : True,
             "default" : "admin"
         },
@@ -153,7 +149,7 @@ def main():
         }
     }
 
-    module = AnsibeModule(
+    module = AnsibleModule(
         argument_spec = argument_spec,
         supports_check_mode = False
     )
@@ -163,8 +159,8 @@ def main():
     url = module.params["url"]
     src = module.params["src"]
 
-    Display().warning(src)
-    Display().warning(type(src))
+    module.warn(str(src))
+    module.warn(str(type(src)))
     
     try:
         scada_import(username, password, url, src)
