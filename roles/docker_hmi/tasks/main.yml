@@ -1,37 +1,19 @@
----
-# tasks file for containerized-hmi
----
-- hosts: hmi
+- name: install dependencies and docker
+  apt:
+    name: "{{ docker_hmi_packages }}"
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+- name: ensure docker is started
+  service:
+    name: docker
+    state: started
+    enabled: yes
+- name: copy docker-compose.yml to remote host
+  copy:
+    src: "{{ src_dir }}/docker-compose.yml"
+    dest: "{{ deploy_dir }}/"
+- name: Create and start services
   become: true
-  vars:
-    ansible_python_interpreter: /bin/python3
-  tasks:
-    - name: install dependencies and docker
-      apt:
-        name: "{{item}}"
-        state: present
-        update_cache: yes
-      loop:
-        - apt-transport-https
-        - ca-certificates
-        - curl
-        - gnupg-agent
-        - software-properties-common
-        - docker
-        - docker-compose
-    - name: ensure docker is started
-      service:
-        name: docker
-        state: started
-        enabled: yes
-    - name: copy docker-compose.yml to remote host
-      copy:
-        src: "{{ src_dir }} "/docker-compose.yml
-        dest: "{{ deploy_dir }}"
-        owner: root
-        group: root
-        mode: 777
-    - name: Create and start services
-      become: true
-      community.docker.docker_compose:
-        project_src: "{{ deploy_dir }}"
+  community.docker.docker_compose:
+    project_src: "{{ deploy_dir }}"
