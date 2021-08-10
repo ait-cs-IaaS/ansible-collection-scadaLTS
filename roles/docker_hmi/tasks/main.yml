@@ -1,19 +1,52 @@
+
 - name: install dependencies and docker
   apt:
     name: "{{ docker_hmi_packages }}"
     state: present
     update_cache: yes
     cache_valid_time: 3600
+
 - name: ensure docker is started
   service:
     name: docker
     state: started
     enabled: yes
+
 - name: copy docker-compose.yml to remote host
   copy:
     src: "{{ src_dir }}/docker-compose.yml"
     dest: "{{ deploy_dir }}/"
+
 - name: Create and start services
   become: true
   community.docker.docker_compose:
     project_src: "{{ deploy_dir }}"
+
+# The uri module won't retry if it recieves a refused to connect because the port is down
+- name: Wait 300 seconds for scadalts port to come online
+  wait_for:
+    port: "{{ docker_hmi_port }}"
+    host: "{{ docker_hmi_hostname }}"
+    delay: 3
+    timeout: 300
+  when: docker_hmi_import_archive is defined and docker_hmi_import_archive | length > 0
+
+- name: Wait for scadalts to become ready
+  uri:
+    url: "{{ docker_hmi_url }}"
+    method: GET
+    follow_redirects: all
+  register: _result
+  until: _result.status == 200
+  retries: 30 # retry X times
+  delay: 60 # pause for X sec b/w each call
+  when: docker_hmi_import_archive is defined and docker_hmi_import_archive | length > 0
+
+- name: Import ScadaLTS .zip config
+  ait.scadalts.import:
+    username: "{{ docker_hmi_username | default(omit) }}"
+    password: "{{ docker_hmi_password | default(omit) }}"
+    url: "{{ docker_hmi_url }}"
+    src: "{{ docker_hmi_import_archive }}"
+  when: docker_hmi_import_archive is defined and docker_hmi_import_archive | length > 0
+  
