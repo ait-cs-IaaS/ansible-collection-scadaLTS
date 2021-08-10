@@ -159,8 +159,6 @@ def main():
     url = module.params["url"]
     src = module.params["src"]
 
-    module.warn(str(src))
-    module.warn(str(type(src)))
     
     try:
         scada_import(username, password, url, src)
