@@ -1,4 +1,4 @@
 ---
 # defaults file for containerized-hmi
-deploy_dir: /home/ubuntu001/Desktop/
-src_dir: /home/controller/Desktop/ansible/remote-configurations/
+deploy_dir: /home/ubuntu001/Desktop
+src_dir: /home/controller/Desktop/ansible/remote-configurations
