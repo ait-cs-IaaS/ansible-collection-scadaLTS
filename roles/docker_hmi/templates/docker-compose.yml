@@ -1,0 +1,15 @@
+version: "3.7"
+
+services:
+    scadalts:
+      image: 'scadalts/scadalts:release'
+      restart: always
+      ports: 
+        - 81:8080
+      volumes:
+        - 'persistent_data:/persistent_data'
+      network_mode: host
+
+volumes:
+    persistent_data:
+        driver: local
