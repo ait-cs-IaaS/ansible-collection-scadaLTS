@@ -14,13 +14,13 @@
 
 - name: copy docker-compose.yml to remote host
   copy:
-    src: "{{ src_dir }}/docker-compose.yml"
-    dest: "{{ deploy_dir }}/"
+    src: "{{ docker_hmi_compose_src }}"
+    dest: "{{ docker_hmi_deploy_dir }}/"
 
 - name: Create and start services
   become: true
   community.docker.docker_compose:
-    project_src: "{{ deploy_dir }}"
+    project_src: "{{ docker_hmi_deploy_dir }}"
 
 # The uri module won't retry if it recieves a refused to connect because the port is down
 - name: Wait 300 seconds for scadalts port to come online
