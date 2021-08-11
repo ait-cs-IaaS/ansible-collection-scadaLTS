@@ -1,4 +1,4 @@
 ---
 # defaults file for containerized-hmi
-deploy_dir: /home/ubuntu001/Desktop
-src_dir: /home/controller/Desktop/ansible/remote-configurations
+docker_hmi_deploy_dir: /opt
+docker_hmi_compose_src: docker-compose.yml
